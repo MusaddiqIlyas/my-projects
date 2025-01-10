@@ -19,6 +19,7 @@ with open(CONFIG_PATH, 'r') as config_file:
 housemates = config['housemates']
 onedrive_path = os.path.expanduser(config['onedrive_path'])
 calendar_url = config['calendar_url']
+bin_collection_link = config['bin_collection_link']
 
 file_path = os.path.join(onedrive_path, 'Bin Assignments Log.xlsx')
 
@@ -208,7 +209,7 @@ try:
             f"Hello {assigned_person},\n\n"
             f"This is a reminder that you are assigned to take out the bins for collection day on {formatted_date}.\n\n"
             f"The following bins will be collected:\n{collection_list_formatted}\n\n"
-            "You can double check which bins here: https://recyclingservices.brent.gov.uk/waste/2021624.\n\n"
+            f"You can double check which bins here: {bin_collection_link}.\n\n"
             "The bins are collected early morning on collection day so make sure you take out the bins the night before.\n\n"
             "Thanks,\nBin Bot"
         )
