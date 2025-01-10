@@ -9,9 +9,14 @@ from email.mime.multipart import MIMEMultipart
 import traceback
 import json
 
-# Construct the path to the config file (if the script is in the same project directory)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the script directory
-CONFIG_PATH = os.path.join(BASE_DIR, 'scriptConfigFiles', 'housematesConfig.json')
+# Get the directory where the script is located (using __file__)
+script_dir = os.path.dirname(__file__)
+
+# Navigate back one level and into the 'configFiles' folder
+CONFIG_PATH = os.path.join(script_dir, '..', 'configFiles', 'housematesConfig.json')
+
+# Normalize the path to make it absolute
+config_file_path = os.path.abspath(CONFIG_PATH)
 
 with open(CONFIG_PATH, 'r') as config_file:
     config = json.load(config_file)
@@ -215,7 +220,7 @@ try:
         )
 
         # Send 1 week reminder
-        if reminder_1_week == 'Not Sent' and (collection_date - current_date).days == 7:
+        if reminder_1_week == 'Not Sent' and (collection_date - current_date).days == 27:
             send_email(email, "Bin Collection Reminder - 1 Week", email_body)
             row[4].value = 'Sent'
 
