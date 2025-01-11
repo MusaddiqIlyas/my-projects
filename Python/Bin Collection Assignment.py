@@ -220,7 +220,7 @@ try:
         )
 
         # Send 1 week reminder
-        if reminder_1_week == 'Not Sent' and (collection_date - current_date).days == 27:
+        if reminder_1_week == 'Not Sent' and (collection_date - current_date).days == 7:
             send_email(email, "Bin Collection Reminder - 1 Week", email_body)
             row[4].value = 'Sent'
 
