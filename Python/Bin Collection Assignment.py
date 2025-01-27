@@ -104,9 +104,11 @@ try:
 
         # Create 'Housemates' sheet and add headers
         ws2 = wb.create_sheet('Housemates')
-        ws2.append(["Name", "Email"])
+        ws2.append(["Name", "Email", "On Holiday"])
         for housemate in housemates:
-            ws2.append([housemate["name"], housemate["email"]])
+            # Assume "On Holiday" status is False by default
+            ws2.append([housemate["name"], housemate["email"], "No"])
+
 
         # Create 'Count' sheet and add headers
         ws3 = wb.create_sheet('Count')
@@ -124,12 +126,16 @@ try:
     else:
         wb = openpyxl.load_workbook(file_path)
 
-    # Get the last assigned person index from the Status sheet
+    # Always fetch the sheets after loading the workbook
+    ws1 = wb['Assignments']
+    ws2 = wb['Housemates']
+    ws3 = wb['Count']
     ws4 = wb['Status']
+
+    # Get the last assigned person index from the Status sheet
     last_assigned_idx = ws4.cell(row=2, column=1).value
 
     # Get existing data in the Assignments sheet and collect the collection dates
-    ws1 = wb['Assignments']
     existing_dates = set()
     for row in ws1.iter_rows(min_row=2, max_col=1, values_only=True):
         # Convert the Excel date to Python date and format it as dd/mm/yyyy
@@ -142,14 +148,31 @@ try:
     # Add new events to the 'Assignments' sheet if they do not already exist
     for event_date, collection_names in sorted_dates:
         formatted_date = format_date(event_date)
-        
+
         # If the date is not in the existing dates, add it
         if formatted_date not in existing_dates:
-            # Join the collection names into a single string
             collection_names_str = ', '.join(collection_names)
 
-            # Get the assigned person from the housemates list, starting from last_assigned_idx
-            assigned_person = housemates[last_assigned_idx]
+            # Find the next housemate who is not on holiday
+            assigned_person = None
+            while True:
+                potential_person = housemates[last_assigned_idx]
+                # Check if the person is on holiday in the Housemates sheet
+                for row in ws2.iter_rows(min_row=2, values_only=True):
+                    if row[0] == potential_person["name"] and row[2] == "No":
+                        assigned_person = potential_person
+                        break
+
+                if assigned_person:
+                    break
+                else:
+                    # Skip to the next housemate if current one is on holiday
+                    last_assigned_idx = (last_assigned_idx + 1) % len(housemates)
+
+            if not assigned_person:
+                print("Error: No available housemates for assignment.")
+                continue
+
             ws1.append([
                 formatted_date,  # Insert the date in dd/mm/yyyy format
                 assigned_person["name"],
