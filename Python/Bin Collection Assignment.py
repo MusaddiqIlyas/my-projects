@@ -99,7 +99,7 @@ try:
         ws1 = wb.active
         ws1.title = 'Assignments'
         ws1.append([
-            "Collection Date", "Assigned Person", "Collection Names", "Reminder 1 Week", "Reminder 1 Day"
+            "Collection Date", "Assigned Person", "Email", "Collection Names", "Reminder 1 Week", "Reminder 1 Day"
         ])
 
         # Create 'Housemates' sheet and add headers
@@ -176,6 +176,7 @@ try:
             ws1.append([
                 formatted_date,  # Insert the date in dd/mm/yyyy format
                 assigned_person["name"],
+                assigned_person["email"],
                 collection_names_str,  # All events for that day in one cell
                 'Not Sent',  # Reminder 1 Week
                 'Not Sent'   # Reminder 1 Day
