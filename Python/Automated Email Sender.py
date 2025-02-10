@@ -68,34 +68,42 @@ def move_to_sent_table(row, wb):
     print(f"Row moved to '{DEST_SHEET}'.")
 
 def process_excel():
-    wb = initialize_workbook()
-    source_ws = wb[SOURCE_SHEET]
-    rows_to_delete = []
+    try:
+        wb = initialize_workbook()
+        source_ws = wb[SOURCE_SHEET]
+        rows_to_delete = []
 
-    for index, row in enumerate(source_ws.iter_rows(min_row=2, values_only=True), start=2):
-        if row[5] and row[5].strip().upper() == 'NEW':
-            category, recipient_name, brand_name, brand_email, admire_your, _ = row
-            
-            if category not in config.get("email_templates", {}):
-                print(f"No template found for category: {category}")
-                continue
-            
-            template = config["email_templates"][category]
-            subject = template["email_subject"].format(Brand_Name=brand_name)
-            body = template["email_body"].format(
-                Recipient_Name=recipient_name,
-                Brand_Name=brand_name,
-                Admire_your=admire_your
-            )
-            
-            if send_email(brand_email, subject, body):
-                move_to_sent_table(row, wb)
-                rows_to_delete.append(index)
-    
-    for row_index in sorted(rows_to_delete, reverse=True):
-        source_ws.delete_rows(row_index)
-    
-    wb.save(EXCEL_FILE)
+        for index, row in enumerate(source_ws.iter_rows(min_row=2, values_only=True), start=2):
+            if row[5] and row[5].strip().upper() == 'NEW':
+                category, recipient_name, brand_name, brand_email, admire_your, _ = row
+                
+                if category not in config.get("email_templates", {}):
+                    print(f"No template found for category: {category}")
+                    continue
+                
+                template = config["email_templates"][category]
+                subject = template["email_subject"].format(Brand_Name=brand_name)
+                body = template["email_body"].format(
+                    Recipient_Name=recipient_name,
+                    Brand_Name=brand_name,
+                    Admire_your=admire_your
+                )
+                
+                if send_email(brand_email, subject, body):
+                    move_to_sent_table(row, wb)
+                    rows_to_delete.append(index)
+        
+        for row_index in sorted(rows_to_delete, reverse=True):
+            source_ws.delete_rows(row_index)
+        
+        wb.save(EXCEL_FILE)
+
+    except Exception as e:
+        exception_type = type(e).__name__
+        exception_detail = str(e)
+        print(f"Error occurred: {exception_type} - {exception_detail}")
+        send_email(os.getenv("GMAIL_ADDRESS"), "Error in Automated Email Sender Script", 
+                f"An error occurred in the script:\n\nException Type: {exception_type}\nException Detail: {exception_detail}")
 
 if __name__ == "__main__":
     process_excel()
