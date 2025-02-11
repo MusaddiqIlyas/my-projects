@@ -221,7 +221,8 @@ try:
         formatted_date = format_date(collection_date)
 
         # Prepare the collection list (could be all bins for the collection day)
-        collection_list = row[3].value  # This assumes the collection names are in the 4th column (Collection Names)
+        #collection_list = row[3].value  # This assumes the collection names are in the 4th column (Collection Names)
+        collection_list = "Recycling collection, Rubbish collection, Food waste collection"
         
         # Ensure collection_list is a string and split it by commas if needed (assuming comma-separated values)
         if isinstance(collection_list, str):
