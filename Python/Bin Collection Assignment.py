@@ -97,7 +97,7 @@ try:
 
         # Create 'Assignments' sheet and add headers
         ws1 = wb.active
-        ws1.title = 'Assignments'
+        ws1.title = 'Bin Assignments'
         ws1.append([
             "Collection Date", "Assigned Person", "Email", "Collection Names", "Reminder 1 Week", "Reminder 1 Day"
         ])
@@ -111,29 +111,47 @@ try:
 
 
         # Create 'Count' sheet and add headers
-        ws3 = wb.create_sheet('Count')
+        ws3 = wb.create_sheet('Bin Count')
         ws3.append(["Housemate", "Count"])
         for housemate in housemates:
             ws3.append([housemate["name"], 0])  # Initialize count as 0
 
         # Create 'Status' sheet to store the last assigned person index
-        ws4 = wb.create_sheet('Status')
+        ws4 = wb.create_sheet('Bin Status')
         ws4.append(["Last Assigned Index"])
-        ws4.append([0])  # Initially set the index to 0
+        ws4.append([0])
+
+        ws5 = wb.create_sheet('Item Requests')
+        ws5.append(["Requested By", "Item Requested", "Date & Time of Request", "Name", "Email", "Email Sent?"])
+
+        ws6 = wb.create_sheet('Dishwashing Liquid Status')
+        ws6.append(["Last Assigned Index"])
+        ws6.append([0]) 
+        
+        ws7 = wb.create_sheet('Black Bin Bag Status')
+        ws7.append(["Last Assigned Index"])
+        ws7.append([0])
+
+        ws8 = wb.create_sheet('Food Waste Bin Bag Status')
+        ws8.append(["Last Assigned Index"])
+        ws8.append([0])
 
         # Save the workbook
         wb.save(file_path)
     else:
         wb = openpyxl.load_workbook(file_path)
 
-    # Always fetch the sheets after loading the workbook
-    ws1 = wb['Assignments']
+    ws1 = wb['Bin Assignments']
     ws2 = wb['Housemates']
-    ws3 = wb['Count']
-    ws4 = wb['Status']
+    ws3 = wb['Bin Count']
+    ws4 = wb['Bin Status']
+    ws5 = wb['Item Requests']
+    ws6 = wb['Dishwashing Liquid Status']
+    ws7 = wb['Black Bin Bag Status']
+
 
     # Get the last assigned person index from the Status sheet
-    last_assigned_idx = ws4.cell(row=2, column=1).value
+    bin_last_assigned_idx = ws4.cell(row=2, column=1).value
 
     # Get existing data in the Assignments sheet and collect the collection dates
     existing_dates = set()
@@ -156,7 +174,7 @@ try:
             # Find the next housemate who is not on holiday
             assigned_person = None
             while True:
-                potential_person = housemates[last_assigned_idx]
+                potential_person = housemates[bin_last_assigned_idx]
                 # Check if the person is on holiday in the Housemates sheet
                 for row in ws2.iter_rows(min_row=2, values_only=True):
                     if row[0] == potential_person["name"] and row[2] == "No":
@@ -167,7 +185,7 @@ try:
                     break
                 else:
                     # Skip to the next housemate if current one is on holiday
-                    last_assigned_idx = (last_assigned_idx + 1) % len(housemates)
+                    bin_last_assigned_idx = (bin_last_assigned_idx + 1) % len(housemates)
 
             if not assigned_person:
                 print("Error: No available housemates for assignment.")
@@ -183,16 +201,16 @@ try:
             ])
 
             # Move to the next housemate
-            last_assigned_idx = (last_assigned_idx + 1) % len(housemates)
+            bin_last_assigned_idx = (bin_last_assigned_idx + 1) % len(housemates)
 
             # Mark this date as processed
             existing_dates.add(formatted_date)
 
     # Update the 'Status' sheet with the new index of the last assigned person
-    ws4.cell(row=2, column=1, value=last_assigned_idx)
+    ws4.cell(row=2, column=1, value=bin_last_assigned_idx)
 
     # Update the 'Count' sheet with the number of assignments for each housemate
-    ws3 = wb['Count']
+    ws3 = wb['Bin Count']
     housemate_count = {housemate["name"]: 0 for housemate in housemates}
 
     # Count how many times each housemate has been assigned in the 'Assignments' sheet
@@ -240,7 +258,7 @@ try:
             f"The following bins will be collected:\n{collection_list_formatted}\n\n"
             f"You can double check which bins here: {bin_collection_link}.\n\n"
             "The bins are collected early morning on collection day so make sure you take out the bins the night before.\n\n"
-            "Thanks,\nBin Bot"
+            "Thanks,\nHouse Bot"
         )
 
         # Send 1 week reminder
